@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数据录入系统 v3.3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 540px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 30px;
+            animation: fadeIn 0.5s ease-out;
+            margin: 20px auto;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: #2c3e50; font-size: 24px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header p { color: #7f8c8d; font-size: 14px; }
+        .factory-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-top: 8px; }
+        .factory-badge.factory1 { background: #e8f5e9; color: #2e7d32; }
+        .factory-badge.factory2 { background: #e3f2fd; color: #1565c0; }
+        .factory-badge.admin { background: #fce4ec; color: #c62828; }
+        .header-buttons { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .header-buttons .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; text-decoration: none;
+        }
+        .header-buttons .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-logout { background: #f1f2f6; color: #2c3e50; }
+        .btn-stats { background: #27ae60; color: white; }
+        .btn-employees { background: #f39c12; color: white; }
+        .btn-salary { background: #3498db; color: white; }
+        .btn-price { background: #9b59b6; color: white; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #34495e; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .form-group label i { color: #667eea; width: 18px; }
+        .form-control {
+            width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0;
+            border-radius: 10px; font-size: 15px; transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+        .form-control:focus { outline: none; border-color: #667eea; background-color: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.2); }
+        .form-control:read-only { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+        select.form-control { appearance: auto; }
+        .btn-primary {
+            display: block; width: 100%; padding: 16px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white; border: none; border-radius: 12px;
+            font-size: 17px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; margin-bottom: 10px;
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            display: block; width: 100%; padding: 14px;
+            background: #f1f2f6; color: #2c3e50;
+            border: 2px solid #dfe4ea; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover { background: #dfe4ea; }
+        .message {
+            padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            text-align: center; font-weight: 500; display: none;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .records-section { margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px; }
+        .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px; }
+        .records-header h3 { color: #2c3e50; font-size: 18px; }
+        .records-table {
+            width: 100%; border-collapse: collapse; background: white;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: none; font-size: 12px;
+        }
+        .records-table th { background-color: #667eea; color: white; padding: 10px 6px; text-align: left; font-weight: 600; font-size: 11px; white-space: nowrap; }
+        .records-table td { padding: 8px 6px; border-bottom: 1px solid #eee; color: #2c3e50; }
+        .records-table tr:hover { background-color: #f8f9fa; }
+        .loading { text-align: center; padding: 20px; color: #7f8c8d; display: none; }
+        .loading i { animation: spin 1s linear infinite; margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .footer { text-align: center; margin-top: 25px; color: #95a5a6; font-size: 12px; }
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #27ae60; color: white; padding: 16px 32px;
+            border-radius: 12px; font-size: 16px; font-weight: 600;
+            box-shadow: 0 10px 30px rgba(39,174,96,0.3);
+            z-index: 9999; display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        .download-section { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; display: none; }
+        .download-section label { font-size: 13px; color: #34495e; font-weight: 600; }
+        .download-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+        .download-row input { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+        .download-row button { padding: 10px 16px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 20px; }
+            .form-control { padding: 12px 14px; }
+            .btn-primary { padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i> 生产数据保存成功！</div>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-industry"></i> 数据录入系统</h1>
+            <p>欢迎，{{ name }}！</p>
+            {% if factory_name %}
+            <div class="factory-badge {{ factory }}"><i class="fas fa-building"></i> {{ factory_name }}</div>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="factory-badge admin"><i class="fas fa-crown"></i> 管理员</div>
+            {% endif %}
+            
+            <div class="header-buttons">
+                <button class="btn btn-logout" onclick="window.location.href='/logout'">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+                {% if role == 'admin' %}
+                <button class="btn btn-price" onclick="showPriceManagement()">
+                    <i class="fas fa-tags"></i> 单价
+                </button>
+                <button class="btn btn-stats" onclick="showStatistics()">
+                    <i class="fas fa-chart-bar"></i> 统计
+                </button>
+                <button class="btn btn-employees" onclick="showEmployeeManagement()">
+                    <i class="fas fa-users-cog"></i> 员工
+                </button>
+                <button class="btn btn-salary" onclick="showSalaryTemplateOptions()">
+                    <i class="fas fa-file-excel"></i> 工资
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="dataForm">
+            <div class="form-group">
+                <label for="serial_no"><i class="fas fa-hashtag"></i> 流水号</label>
+                <input type="text" id="serial_no" class="form-control" placeholder="请输入流水号" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="date"><i class="far fa-calendar-alt"></i> 日期</label>
+                <input type="date" id="date" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="style_no"><i class="fas fa-barcode"></i> 款号</label>
+                <input type="text" id="style_no" class="form-control" placeholder="输入款号后自动带出单价" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="color"><i class="fas fa-palette"></i> 颜色</label>
+                <input type="text" id="color" class="form-control" placeholder="请输入产品颜色" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="size"><i class="fas fa-ruler"></i> 尺码</label>
+                <input type="text" id="size" class="form-control" placeholder="请输入尺码（如：M、L、XL）">
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity"><i class="fas fa-boxes"></i> 数量</label>
+                <input type="number" id="quantity" class="form-control" placeholder="请输入生产数量" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="bed_count"><i class="fas fa-bed"></i> 床数</label>
+                <input type="text" id="bed_count" class="form-control" placeholder="请输入床数">
+            </div>
+            
+            <div class="form-group">
+                <label for="unit_price"><i class="fas fa-dollar-sign"></i> 单价（元）</label>
+                <input type="text" id="unit_price" class="form-control" placeholder="输入款号后自动带出" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="quality"><i class="fas fa-check-circle"></i> 质量状态</label>
+                <select id="quality" class="form-control">
+                    <option value="合格">合格</option>
+                    <option value="不合格">不合格</option>
+                    <option value="返工">返工</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="remark"><i class="fas fa-comment"></i> 备注 (可选)</label>
+                <textarea id="remark" class="form-control" placeholder="请输入备注信息" rows="2"></textarea>
+            </div>
+            
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> 提交生产数据
+            </button>
+            
+            <button type="button" id="viewRecords" class="btn-secondary">
+                <i class="fas fa-list"></i> 查看我的记录
+            </button>
+        </form>
+        
+        <div class="records-section">
+            <div class="records-header">
+                <h3><i class="fas fa-history"></i> 历史记录</h3>
+                <button type="button" id="showDownload" class="btn-secondary" style="width: auto; padding: 8px 14px; font-size: 13px;">
+                    <i class="fas fa-download"></i> 导出Excel
+                </button>
+            </div>
+            
+            <div id="downloadSection" class="download-section">
+                <label><i class="far fa-calendar-alt"></i> 选择月份：</label>
+                <div class="download-row">
+                    <input type="month" id="exportMonth">
+                    <button onclick="downloadExcel()"><i class="fas fa-download"></i> 导出</button>
+                    <button onclick="document.getElementById('downloadSection').style.display='none'" style="background:#e74c3c;padding:10px 12px;color:white;border:none;border-radius:8px;cursor:pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+            
+            <table id="recordsTable" class="records-table">
+                <thead>
+                    <tr>
+                        <th>流水号</th>
+                        <th>日期</th>
+                        <th>款号</th>
+                        <th>颜色</th>
+                        <th>尺码</th>
+                        <th>数量</th>
+                        <th>床数</th>
+                        <th>单价</th>
+                        <th>金额</th>
+                        <th>质量</th>
+                        <th>人员</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>系统运行在 <span id="serverUrl">http://localhost:5000</span></p>
+            <p>v3.3 - 尺码 · 员工管理 · 按月统计</p>
+        </div>
+    </div>
+
+    <script>
+        const serverUrl = window.location.origin;
+        document.getElementById('serverUrl').textContent = serverUrl;
+        
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('exportMonth').value = new Date().toISOString().slice(0, 7);
+        
+        // ===== 款号输入时自动查询单价 =====
+        let priceQueryTimer = null;
+        document.getElementById('style_no').addEventListener('input', function() {
+            clearTimeout(priceQueryTimer);
+            const styleNo = this.value.trim();
+            if (styleNo.length >= 2) {
+                priceQueryTimer = setTimeout(() => queryPrice(styleNo), 300);
+            } else {
+                document.getElementById('unit_price').value = '';
+            }
+        });
+        
+        async function queryPrice(styleNo) {
+            try {
+                const response = await fetch(`/api/prices/${encodeURIComponent(styleNo)}`);
+                const result = await response.json();
+                if (result.success && result.price !== null) {
+                    document.getElementById('unit_price').value = result.price + ' 元';
+                } else {
+                    document.getElementById('unit_price').value = '';
+                }
+            } catch (e) {}
+        }
+        
+        // ===== 表单提交 =====
+        document.getElementById('dataForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                serial_no: document.getElementById('serial_no').value.trim(),
+                date: document.getElementById('date').value,
+                style_no: document.getElementById('style_no').value.trim(),
+                color: document.getElementById('color').value.trim(),
+                size: document.getElementById('size').value.trim(),
+                quantity: parseInt(document.getElementById('quantity').value),
+                bed_count: document.getElementById('bed_count').value.trim(),
+                quality: document.getElementById('quality').value,
+                remark: document.getElementById('remark').value.trim()
+            };
+            
+            if (!data.serial_no || !data.date || !data.style_no || !data.color || !data.quantity) {
+                showMessage('请填写所有必填字段（流水号、日期、款号、颜色、数量）', 'error');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ 生产数据保存成功！');
+                    document.getElementById('serial_no').value = '';
+                    document.getElementById('style_no').value = '';
+                    document.getElementById('color').value = '';
+                    document.getElementById('size').value = '';
+                    document.getElementById('quantity').value = '';
+                    document.getElementById('bed_count').value = '';
+                    document.getElementById('unit_price').value = '';
+                    document.getElementById('remark').value = '';
+                    loadRecords();
+                } else {
+                    showMessage('❌ 提交失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ 网络错误：' + error.message, 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> ' + text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+        
+        document.getElementById('viewRecords').addEventListener('click', function() {
+            const table = document.getElementById('recordsTable');
+            if (table.style.display === 'table') {
+                table.style.display = 'none';
+                this.innerHTML = '<i class="fas fa-list"></i> 查看我的记录';
+            } else {
+                table.style.display = 'table';
+                this.innerHTML = '<i class="fas fa-times"></i> 隐藏记录';
+                loadRecords();
+            }
+        });
+        
+        document.getElementById('showDownload').addEventListener('click', function() {
+            const section = document.getElementById('downloadSection');
+            section.style.display = section.style.display === 'none' || section.style.display === '' ? 'block' : 'none';
+        });
+        
+        async function downloadExcel() {
+            const month = document.getElementById('exportMonth').value;
+            if (!month) {
+                showMessage('请选择月份', 'error');
+                return;
+            }
+            window.open(`/api/download?month=${month}`, '_blank');
+            showMessage(`📥 正在导出 ${month} 月数据...`, 'success');
+        }
+        
+        async function loadRecords() {
+            const tableBody = document.getElementById('recordsBody');
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('recordsTable');
+            
+            loading.style.display = 'block';
+            table.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/records');
+                const result = await response.json();
+                
+                if (result.success) {
+                    tableBody.innerHTML = '';
+                    
+                    if (result.records && result.records.length > 0) {
+                        result.records.forEach(record => {
+                            const row = document.createElement('tr');
+                            const qualityColor = record.质量状态 === '合格' ? '#d4edda' : 
+                                               record.质量状态 === '不合格' ? '#f8d7da' : '#fff3cd';
+                            const qualityTextColor = record.质量状态 === '合格' ? '#155724' : 
+                                                    record.质量状态 === '不合格' ? '#721c24' : '#856404';
+                            const price = record.单价 || 0;
+                            const amount = record.金额 || 0;
+                            row.innerHTML = `
+                                <td>${record.流水号 || ''}</td>
+                                <td>${record.日期 || ''}</td>
+                                <td>${record.款号 || ''}</td>
+                                <td>${record.颜色 || ''}</td>
+                                <td>${record.尺码 || ''}</td>
+                                <td>${record.数量 || ''}</td>
+                                <td>${record.床数 || ''}</td>
+                                <td>${price}</td>
+                                <td>${amount}</td>
+                                <td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;background:${qualityColor};color:${qualityTextColor};">${record.质量状态 || '合格'}</span></td>
+                                <td>${record.人员 || ''}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                        table.style.display = 'table';
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;">暂无记录</td></tr>';
+                        table.style.display = 'table';
+                    }
+                } else {
+                    showMessage('加载记录失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('加载记录失败：' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            if (type !== 'success' || !text.includes('<')) {
+                setTimeout(() => { messageEl.style.display = 'none'; }, 5000);
+            }
+        }
+        
+        // ===== 单价管理 =====
+        async function showPriceManagement() {
+            try {
+                const response = await fetch('/api/prices');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const prices = result.prices;
+                    let priceListHtml = '';
+                    for (const [style, price] of Object.entries(prices)) {
+                        priceListHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;">
+                            <span><strong>${style}</strong></span>
+                            <span style="color:#27ae60;font-weight:bold;">${price} 元</span>
+                            <button onclick="deletePrice('${style}')" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>`;
+                    }
+                    if (!priceListHtml) priceListHtml = '<div style="text-align:center;padding:20px;color:#95a5a6;">暂无单价数据，请添加</div>';
+                    
+                    const html = `
+                        <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                            <h3 style="color:#2c3e50;margin-bottom:15px;"><i class="fas fa-tags"></i> 单价管理</h3>
+                            <div style="display:flex;gap:8px;margin-bottom:15px;">
+                                <input type="text" id="newStyleNo" placeholder="款号" style="flex:1;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                                <input type="number" id="newPrice" placeholder="单价" step="0.01" min="0" style="width:100px;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                                <button onclick="savePrice()" style="padding:10px 16px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                    <i class="fas fa-plus"></i> 添加
+                                </button>
+                            </div>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;max-height:250px;overflow-y:auto;">
+                                ${priceListHtml}
+                            </div>
+                            <div style="margin-top:10px;font-size:12px;color:#95a5a6;">
+                                <i class="fas fa-info-circle"></i> 员工录入款号时自动带出单价（只读）
+                            </div>
+                            <button onclick="document.getElementById('message').style.display='none'" style="display:block;width:100%;margin-top:15px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">
+                                <i class="fas fa-times"></i> 关闭
+                            </button>
+                        </div>`;
+                    
+                    showMessage(html, 'success');
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').classList.remove('success', 'error');
+                    document.getElementById('message').innerHTML = html;
+                } else {
+                    showMessage('获取单价失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('获取单价失败：' + error.message, 'error');
+            }
+        }
+        
+        async function savePrice() {
+            const styleNo = document.getElementById('newStyleNo').value.trim();
+            const price = document.getElementById('newPrice').value.trim();
+            if (!styleNo || !price) {
+                showMessage('请填写款号和单价', 'error');
+                return;
+            }
+            try {
+                const response = await fetch('/api/prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ style_no: styleNo, price: price })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showPriceManagement();
+                } else {
+                    showMessage('保存失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('保存失败：' + error.message, 'error');
+            }
+        }
+        
+        async function deletePrice(styleNo) {
+            if (!confirm(`确定删除款号 ${styleNo} 的单价？`)) return;
+            try {
+                const response = await fetch(`/api/prices/${encodeURIComponent(styleNo)}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (result.success) {
+                    showPriceManagement();
+                } else {
+                    showMessage('删除失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('删除失败：' + error.message, 'error');
+            }
+        }
+        
+        // ===== 统计（按月筛选） =====
+        async function showStatistics() {
+            const month = prompt('请输入要统计的月份（格式：YYYY-MM，留空为全部）：', new Date().toISOString().slice(0, 7));
+            if (month === null) return;
+            
+            try {
+                const url = month ? `/api/statistics?month=${month}` : '/api/statistics';
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.statistics;
+                    const monthLabel = month ? `${month}月` : '全部';
+                    let html = `
+                        <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                            <h3 style="color:#2c3e50;margin-bottom:20px;"><i class="fas fa-chart-pie"></i> 生产数据统计 <span style="font-size:14px;color:#7f8c8d;">(${monthLabel})</span></h3>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+                                <div style="background:#f8f9fa;padding:15px;border-radius:8px;border-left:4px solid #667eea;">
+                                    <div style="font-size:13px;color:#7f8c8d;">总记录数</div>
+                                    <div style="font-size:22px;font-weight:bold;color:#2c3e50;">${stats.total_records}</div>
+                                </div>
+                                <div style="background:#f8f9fa;padding:15px;border-radius:8px;border-left:4px solid #2ecc71;">
+                                    <div style="font-size:13px;color:#7f8c8d;">总产量</div>
+                                    <div style="font-size:22px;font-weight:bold;color:#2c3e50;">${stats.total_quantity}</div>
+                                </div>
+                            </div>`;
+                    
+                    if (stats.monthly_salary && Object.keys(stats.monthly_salary).length > 0) {
+                        html += `<h4 style="color:#34495e;margin:15px 0 10px;"><i class="fas fa-money-bill-wave"></i> 员工月工资表</h4>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;max-height:250px;overflow-y:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                                    <thead><tr style="background:#e9ecef;">
+                                        <th style="padding:8px;text-align:left;">员工</th>
+                                        <th style="padding:8px;text-align:right;">产量</th>
+                                        <th style="padding:8px;text-align:right;">工资（元）</th>
+                                    </tr></thead>
+                                    <tbody>`;
+                        let totalSalary = 0;
+                        for (const [person, salary] of Object.entries(stats.monthly_salary)) {
+                            const qty = stats.by_person[person] || 0;
+                            totalSalary += salary;
+                            html += `<tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px;">${person}</td>
+                                <td style="padding:8px;text-align:right;">${qty}</td>
+                                <td style="padding:8px;text-align:right;color:#27ae60;font-weight:bold;">${salary.toFixed(2)}</td>
+                            </tr>`;
+                        }
+                        html += `<tr style="background:#e8f5e9;font-weight:bold;">
+                            <td style="padding:8px;">合计</td>
+                            <td style="padding:8px;text-align:right;">${stats.total_quantity}</td>
+                            <td style="padding:8px;text-align:right;color:#27ae60;">${totalSalary.toFixed(2)}</td>
+                        </tr>`;
+                        html += `</tbody></table></div>`;
+                    }
+                    
+                    if (stats.style_summary && Object.keys(stats.style_summary).length > 0) {
+                        html += `<h4 style="color:#34495e;margin:15px 0 10px;"><i class="fas fa-box"></i> 各款号数量汇总</h4>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;max-height:250px;overflow-y:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                                    <thead><tr style="background:#e9ecef;">
+                                        <th style="padding:8px;text-align:left;">款号</th>
+                                        <th style="padding:8px;text-align:right;">数量</th>
+                                        <th style="padding:8px;text-align:right;">金额（元）</th>
+                                    </tr></thead>
+                                    <tbody>`;
+                        for (const [style, data] of Object.entries(stats.style_summary)) {
+                            html += `<tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px;">${style}</td>
+                                <td style="padding:8px;text-align:right;">${data.quantity}</td>
+                                <td style="padding:8px;text-align:right;color:#e67e22;font-weight:bold;">${data.amount.toFixed(2)}</td>
+                            </tr>`;
+                        }
+                        html += `</tbody></table></div>`;
+                    }
+                    
+                    if (stats.by_factory && Object.keys(stats.by_factory).length > 0) {
+                        html += `<h4 style="color:#34495e;margin:15px 0 10px;"><i class="fas fa-building"></i> 各工厂产量</h4>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;">`;
+                        for (const [factory, data] of Object.entries(stats.by_factory)) {
+                            const color = factory === '一厂' ? '#2e7d32' : '#1565c0';
+                            html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                                <span><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;margin-right:8px;"></span>${factory}</span>
+                                <span style="font-weight:bold;">${data.quantity} (${data.records}条)</span>
+                            </div>`;
+                        }
+                        html += `</div>`;
+                    }
+                    
+                    if (stats.by_quality && Object.keys(stats.by_quality).length > 0) {
+                        html += `<h4 style="color:#34495e;margin:15px 0 10px;"><i class="fas fa-check-circle"></i> 质量统计</h4>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;">`;
+                        for (const [quality, count] of Object.entries(stats.by_quality)) {
+                            const color = quality === '合格' ? '#2ecc71' : quality === '不合格' ? '#e74c3c' : '#f39c12';
+                            html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+                                <span><span style="display:inline-block;width:10px;height:10px;background:${color};border-radius:50%;margin-right:8px;"></span>${quality}</span>
+                                <span style="font-weight:bold;">${count}</span>
+                            </div>`;
+                        }
+                        html += `</div>`;
+                    }
+                    
+                    html += `<div style="margin-top:15px;font-size:12px;color:#95a5a6;text-align:right;">最后更新: ${stats.last_updated}</div>
+                        <button onclick="document.getElementById('message').style.display='none'" style="display:block;width:100%;margin-top:15px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">
+                            <i class="fas fa-times"></i> 关闭统计
+                        </button></div>`;
+                    
+                    showMessage(html, 'success');
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').classList.remove('success', 'error');
+                    document.getElementById('message').innerHTML = html;
+                } else {
+                    showMessage('获取统计失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('获取统计失败：' + error.message, 'error');
+            }
+        }
+        
+        // ===== 员工管理（增删改） =====
+        async function showEmployeeManagement() {
+            try {
+                const response = await fetch('/api/employees');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const employees = result.employees;
+                    let html = `
+                        <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                            <h3 style="color:#2c3e50;margin-bottom:15px;"><i class="fas fa-users-cog"></i> 员工管理</h3>
+                            <div style="margin-bottom:15px;">
+                                <button onclick="showAddEmployeeForm()" style="padding:10px 16px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                    <i class="fas fa-user-plus"></i> 添加员工
+                                </button>
+                            </div>
+                            <div style="background:#f8f9fa;padding:15px;border-radius:8px;max-height:300px;overflow-y:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                                    <thead><tr style="background:#e9ecef;">
+                                        <th style="padding:8px;text-align:left;">用户名</th>
+                                        <th style="padding:8px;text-align:left;">姓名</th>
+                                        <th style="padding:8px;text-align:left;">工厂</th>
+                                        <th style="padding:8px;text-align:center;">操作</th>
+                                    </tr></thead>
+                                    <tbody>`;
+                    
+                    for (const [username, info] of Object.entries(employees)) {
+                        const factoryColor = info.factory === '一厂' ? '#2e7d32' : info.factory === '二厂' ? '#1565c0' : '#e74c3c';
+                        const factoryBg = info.factory === '一厂' ? '#e8f5e9' : info.factory === '二厂' ? '#e3f2fd' : '#fadbd8';
+                        const isAdmin = username === 'admin';
+                        html += `<tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:8px;">${username}</td>
+                            <td style="padding:8px;">${info.name}</td>
+                            <td style="padding:8px;"><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;background:${factoryBg};color:${factoryColor};">${info.factory}</span></td>
+                            <td style="padding:8px;text-align:center;">
+                                ${isAdmin ? '<span style="color:#95a5a6;font-size:11px;">管理员</span>' : `
+                                <button onclick="editEmployee('${username}')" style="background:#3498db;color:white;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;margin-right:4px;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteEmployee('${username}')" style="background:#e74c3c;color:white;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>`}
+                            </td>
+                        </tr>`;
+                    }
+                    
+                    html += `</tbody></table></div>
+                        <div style="margin-top:15px;font-size:12px;color:#95a5a6;">
+                            <p><i class="fas fa-info-circle"></i> 员工信息保存在 employees.json 文件中</p>
+                        </div>
+                        <button onclick="document.getElementById('message').style.display='none'" style="display:block;width:100%;margin-top:15px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">
+                            <i class="fas fa-times"></i> 关闭
+                        </button></div>`;
+                    
+                    showMessage(html, 'success');
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').classList.remove('success', 'error');
+                    document.getElementById('message').innerHTML = html;
+                } else {
+                    showMessage('获取员工列表失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('获取员工列表失败：' + error.message, 'error');
+            }
+        }
+        
+        function showAddEmployeeForm() {
+            const html = `
+                <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                    <h3 style="color:#2c3e50;margin-bottom:15px;"><i class="fas fa-user-plus"></i> 添加员工</h3>
+                    <div class="form-group">
+                        <label>登录名</label>
+                        <input type="text" id="newEmpUsername" class="form-control" placeholder="至少3个字符" required>
+                    </div>
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="newEmpName" class="form-control" placeholder="员工姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="newEmpPassword" class="form-control" placeholder="至少4个字符" required>
+                    </div>
+                    <div class="form-group">
+                        <label>所属工厂</label>
+                        <select id="newEmpFactory" class="form-control">
+                            <option value="factory1">一厂</option>
+                            <option value="factory2">二厂</option>
+                        </select>
+                    </div>
+                    <button onclick="addEmployee()" style="padding:12px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;width:100%;">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <button onclick="showEmployeeManagement()" style="padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;width:100%;margin-top:8px;">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                </div>`;
+            
+            showMessage(html, 'success');
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').classList.remove('success', 'error');
+            document.getElementById('message').innerHTML = html;
+        }
+        
+        async function addEmployee() {
+            const username = document.getElementById('newEmpUsername').value.trim();
+            const name = document.getElementById('newEmpName').value.trim();
+            const password = document.getElementById('newEmpPassword').value.trim();
+            const factory_id = document.getElementById('newEmpFactory').value;
+            
+            if (!username || !name || !password) {
+                showMessage('请填写所有字段', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/employees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, name, password, factory_id })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showEmployeeManagement();
+                } else {
+                    showMessage('添加失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('添加失败：' + error.message, 'error');
+            }
+        }
+        
+        function editEmployee(username) {
+            const html = `
+                <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                    <h3 style="color:#2c3e50;margin-bottom:15px;"><i class="fas fa-edit"></i> 编辑员工 - ${username}</h3>
+                    <div class="form-group">
+                        <label>新密码（留空不修改）</label>
+                        <input type="password" id="editEmpPassword" class="form-control" placeholder="至少4个字符">
+                    </div>
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="editEmpName" class="form-control" placeholder="员工姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>所属工厂</label>
+                        <select id="editEmpFactory" class="form-control">
+                            <option value="factory1">一厂</option>
+                            <option value="factory2">二厂</option>
+                        </select>
+                    </div>
+                    <button onclick="updateEmployee('${username}')" style="padding:12px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;width:100%;">
+                        <i class="fas fa-save"></i> 更新
+                    </button>
+                    <button onclick="showEmployeeManagement()" style="padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;width:100%;margin-top:8px;">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                </div>`;
+            
+            showMessage(html, 'success');
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').classList.remove('success', 'error');
+            document.getElementById('message').innerHTML = html;
+        }
+        
+        async function updateEmployee(username) {
+            const password = document.getElementById('editEmpPassword').value.trim();
+            const name = document.getElementById('editEmpName').value.trim();
+            const factory_id = document.getElementById('editEmpFactory').value;
+            
+            const data = { factory_id };
+            if (password) data.password = password;
+            if (name) data.name = name;
+            
+            try {
+                const response = await fetch(`/api/employees/${username}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showEmployeeManagement();
+                } else {
+                    showMessage('更新失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('更新失败：' + error.message, 'error');
+            }
+        }
+        
+        async function deleteEmployee(username) {
+            if (!confirm(`确定删除员工 ${username}？`)) return;
+            try {
+                const response = await fetch(`/api/employees/${username}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (result.success) {
+                    showEmployeeManagement();
+                } else {
+                    showMessage('删除失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('删除失败：' + error.message, 'error');
+            }
+        }
+        
+        // ===== 工资模板 =====
+        function showSalaryTemplateOptions() {
+            const html = `
+                <div style="background:white;padding:20px;border-radius:12px;margin-top:20px;">
+                    <h3 style="color:#2c3e50;margin-bottom:15px;"><i class="fas fa-file-excel"></i> 工资计算模板</h3>
+                    <div style="margin-bottom:15px;font-size:13px;color:#7f8c8d;">
+                        包含：工资计算表、产量明细表、质量统计表、工资汇总表
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr;gap:12px;">
+                        <button onclick="generateSalaryTemplate()" style="padding:12px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;">
+                            <i class="fas fa-magic"></i> 生成工资模板
+                        </button>
+                        <button onclick="downloadSalaryTemplate()" style="padding:12px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;">
+                            <i class="fas fa-download"></i> 下载工资模板
+                        </button>
+                    </div>
+                    <button onclick="document.getElementById('message').style.display='none'" style="display:block;width:100%;margin-top:15px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>`;
+            
+            showMessage(html, 'success');
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').classList.remove('success', 'error');
+            document.getElementById('message').innerHTML = html;
+        }
+        
+        async function generateSalaryTemplate() {
+            try {
+                const response = await fetch('/api/admin/salary-template');
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(`✅ 工资模板生成成功！文件：${result.template_file}`, 'success');
+                } else {
+                    showMessage('❌ 生成失败：' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ 生成失败：' + error.message, 'error');
+            }
+        }
+        
+        function downloadSalaryTemplate() {
+            window.open('/api/admin/download-salary-template', '_blank');
+            showMessage('📥 下载已开始...', 'success');
+        }
+        
+        // ===== 页面加载 =====
+        window.addEventListener('load', () => {
+            showMessage('欢迎使用制造工厂数据录入系统 v3.3！尺码 · 员工管理 · 按月统计', 'success');
+        });
+    </script>
+</body>
+</html>
