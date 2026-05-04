@@ -1,0 +1,109 @@
+{
+  "admin": {
+    "password": "0192023a7bbd73250516f069df18b500",
+    "name": "管理员",
+    "role": "admin"
+  },
+  "emp001": {
+    "password": "81dc9bdb52d04dc20036dbd8313ed055",
+    "name": "杨焕君",
+    "role": "employee",
+    "factory": "factory1"
+  },
+  "emp002": {
+    "password": "98b583ae513406703bd8c5c4cd3c5491",
+    "name": "员工2",
+    "role": "employee"
+  },
+  "emp003": {
+    "password": "b38d6f390d23279b538d8ab2685b1049",
+    "name": "员工3",
+    "role": "employee"
+  },
+  "emp004": {
+    "password": "6f377e7d42e492eba9a359e263c08e90",
+    "name": "员工4",
+    "role": "employee"
+  },
+  "emp005": {
+    "password": "e6fbbfd9f8a582929b51c66323450b5e",
+    "name": "员工5",
+    "role": "employee"
+  },
+  "emp006": {
+    "password": "bf68d93afc688d1fca3df97a45e37988",
+    "name": "员工6",
+    "role": "employee"
+  },
+  "emp007": {
+    "password": "a70bcfa5888ba38b503d17ab5218fafd",
+    "name": "员工7",
+    "role": "employee"
+  },
+  "emp008": {
+    "password": "978f15b0a0ca45e14189cfcf23673170",
+    "name": "员工8",
+    "role": "employee"
+  },
+  "emp009": {
+    "password": "c8d7aa0b2052420d5ad4b32e1f784e39",
+    "name": "员工9",
+    "role": "employee"
+  },
+  "emp010": {
+    "password": "7465c445b4ebb32e102003c4a43640e9",
+    "name": "员工10",
+    "role": "employee"
+  },
+  "emp011": {
+    "password": "628088020476ac2fefc8d4370b4695cb",
+    "name": "员工11",
+    "role": "employee"
+  },
+  "emp012": {
+    "password": "fe931702d9413161d33b4a3700daca46",
+    "name": "员工12",
+    "role": "employee"
+  },
+  "emp013": {
+    "password": "882a4ab67298a63df73ad80d938efb0c",
+    "name": "员工13",
+    "role": "employee"
+  },
+  "emp014": {
+    "password": "20d9189fd08a351b4adda375074fa655",
+    "name": "员工14",
+    "role": "employee"
+  },
+  "emp015": {
+    "password": "efc4aac91b92fb3183d204789e8872b1",
+    "name": "员工15",
+    "role": "employee"
+  },
+  "emp016": {
+    "password": "3fa470683e03361da019a3d0e7eb9df5",
+    "name": "员工16",
+    "role": "employee"
+  },
+  "emp017": {
+    "password": "d40735c14917420f576c276f0f85b8a1",
+    "name": "员工17",
+    "role": "employee"
+  },
+  "emp018": {
+    "password": "f23ce5bb6d833a4fde00381121306ebe",
+    "name": "员工18",
+    "role": "employee"
+  },
+  "emp019": {
+    "password": "d6fdcbdfff034156d4c88ba57b753d6f",
+    "name": "员工19",
+    "role": "employee"
+  },
+  "test_emp": {
+    "password": "cc03e747a6afbbcbf8be7668acfebee5",
+    "name": "测试员工",
+    "role": "employee",
+    "factory": "factory1"
+  }
+}

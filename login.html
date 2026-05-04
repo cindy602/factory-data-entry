@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录 - 制造工厂数据录入系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 40px 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .login-header .icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .login-header h1 {
+            color: #2c3e50;
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .factory-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .factory-info i {
+            margin-right: 8px;
+        }
+        
+        .factory-info .factory-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group label i {
+            color: #667eea;
+            width: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+        
+        .login-footer p {
+            margin-bottom: 5px;
+        }
+        
+        .test-accounts {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .test-accounts h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .test-accounts .account {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            color: #7f8c8d;
+        }
+        
+        .test-accounts .account:last-child {
+            border-bottom: none;
+        }
+        
+        .test-accounts .account .role {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .login-header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="icon">
+                <i class="fas fa-industry"></i>
+            </div>
+            <h1>制造工厂数据录入系统</h1>
+            <p>请登录以录入生产数据</p>
+        </div>
+        
+        <div class="factory-info">
+            <i class="fas fa-building"></i>
+            <span>支持 <strong>一厂</strong> 和 <strong>二厂</strong> 独立运作</span>
+        </div>
+        
+        {% if error %}
+        <div class="error-message show">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> 用户名</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="请输入用户名" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> 密码</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="请输入密码" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> 登录
+            </button>
+        </form>
+        
+        <div class="test-accounts">
+            <h4><i class="fas fa-info-circle"></i> 测试账号</h4>
+            <div class="account">
+                <span><span class="role">管理员</span> admin</span>
+                <span>admin123</span>
+            </div>
+            <div class="account">
+                <span><span class="role">一厂</span> f1_emp01 ~ f1_emp10</span>
+                <span>f1_emp01123 ~ f1_emp10123</span>
+            </div>
+            <div class="account">
+                <span><span class="role">二厂</span> f2_emp01 ~ f2_emp10</span>
+                <span>f2_emp01123 ~ f2_emp10123</span>
+            </div>
+        </div>
+        
+        <div class="login-footer">
+            <p>系统运行在局域网内，请确保手机与电脑在同一网络</p>
+            <p>v3.0 - 支持多工厂</p>
+        </div>
+    </div>
+</body>
+</html>
